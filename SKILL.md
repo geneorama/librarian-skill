@@ -33,6 +33,10 @@ lives in `references/`:
 
 If a reference contradicts something you believed, the reference wins.
 
+**First run, no registry yet?** Don't improvise setup steps here — read
+`README.md` and `references/vaults.md`, then guide the owner through setup
+from there.
+
 ## Ground rules
 
 - **Additive and reversible only.** Create files, add frontmatter fields. Never
@@ -43,7 +47,12 @@ If a reference contradicts something you believed, the reference wins.
 - **Note bodies are read-only.** Copy files byte-for-byte (`cp`), never by retyping
   content through your own context — retyped content silently mutates (a file was
   once "summarized" in transit; see the case archive). Frontmatter changes are
-  surgical patches to the YAML lines only, and only to the sync fields.
+  surgical patches to the YAML lines only, and only to the sync fields. Every
+  agent-initiated copy is hash-verified (source vs. destination) — this isn't
+  optional under time pressure. The owner directly instructing an edit to a
+  specific file ("edit this note yourself, right now") is a different, allowed
+  case — it's a one-off owner action carried out with your hands, not the
+  librarian workflow, and doesn't set precedent for unsupervised edits later.
 - **Match notes by `id`, never by filename.** Renames and splits are normal life
   events for a note; the id is its identity.
 - **Never resolve conflicts.** Both copies changed → report both sides with hashes
@@ -59,6 +68,9 @@ If a reference contradicts something you believed, the reference wins.
 - **Ambiguity → ask.** A wrong guess costs more than a question. Reports are plain
   and specific: no boilerplate, no restating note contents, issues stated as
   issues.
+- **Use context before asking.** Look at what's already there first — existing
+  frontmatter, existing folder structure, configured MCP connections. Ask only
+  what's left ambiguous after looking, not what a look would have answered.
 
 ## Judgment: personal and sensitive content
 
@@ -139,6 +151,9 @@ stamp a second identity.
 
 ### Check ("what's in what" — the inin report)
 
+`scripts/inin.py` implements this workflow directly — run it rather than
+reconstructing the logic by hand.
+
 For any two sets — a note's declared `sync vaults` vs. actual placements, or
 folder vs. folder, vault vs. vault — report the five membership numbers:
 
@@ -196,6 +211,15 @@ Never repeat an open issue in later reports — reference it.
 | Enumerate managed notes | managed-notes Base, or `rg -l "^(home vault\|sync vaults):"` |
 | Frontmatter edit | surgical patch of YAML lines (Edit tool), or Obsidian CLI property commands |
 | Long-note triage | read-only subagent (workflow above) |
+| Hash-verify a vault pair | `scripts/sync_hash_vaults.py <key_a> <key_b>` — writes id/filename/hash CSVs per vault (config-driven, see below) |
+| Diff two hash CSVs | `scripts/sync_diff_report.py <csv_a> <csv_b>` — only-in-A / only-in-B / same-id-different-hash, with a `noisecheck` mode that filters whitespace/nbsp noise |
+| Run the Check workflow | `scripts/inin.py <source_key> <target_key>` — MISSING / NAME-ONLY / BAD-ID report; this **is** the Check workflow below, not a separate tool |
+
+`scripts/` reads vault paths from `config/vaults.yaml` (gitignored, real
+paths) or falls back to `config-sample/vaults.yaml` (placeholder paths, safe
+to publish). Copy the sample to `config/vaults.yaml` and fill in real paths
+before first use; each script also accepts `--explicit <path> ...` args to
+bypass config entirely.
 
 Cross-machine hash comparisons: normalize CRLF→LF first. A same-machine `cp`
 needs no normalization — it is byte-identical by construction.

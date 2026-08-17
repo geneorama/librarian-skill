@@ -3,9 +3,14 @@
 The skill is generic; every installation supplies its own registry. **The live
 registry is a note the owner maintains in their vaults** — recommended: a managed
 note in the agent vault (e.g. `registry-vaults`), synced by these same workflows
-so every machine sees the current version. Read it before touching files. If no
-registry note exists yet, ask the owner and offer to create one from the template
-below.
+so every machine sees the current version. Read it before touching files.
+
+**No registry note exists yet?** Stop before any file action. Look first —
+configured MCP connections already name every reachable vault, and often
+whether each is writable — propose a starting table built from that (see
+template below), owner confirms/edits, then save it as the registry note.
+Don't ask the owner to type the vault list from scratch when you can already
+see it.
 
 ## Example vault set
 
