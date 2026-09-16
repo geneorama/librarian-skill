@@ -1,30 +1,25 @@
-#!/usr/bin/env python3
-"""
-Count notes per (type, folder) pair in a vault, showing where each type
-actually lives. Implements references/taxonomy.md's "Building your own
-type->folder table" section. Not a live query — re-run and re-paste when
-the taxonomy needs a refresh.
-
-Usage (uses config/vaults.yaml, falls back to config-sample):
-    python3 type-aggregator.py <vault_key>
-
-Usage (explicit, ignores config):
-    python3 type-aggregator.py --explicit <vault_path>
-"""
-import os
-import re
-import sys
+import argparse
+import os, re, yaml
 from collections import Counter
 
-import yaml
+## Example use
+## python3 type-aggregator.py --vault coc-work
+## python3 type-aggregator.py --vault coc-work --fixed
 
-import config_loader
+fm_re = re.compile(r'^---\n(.*?)\n---\n', re.DOTALL)
 
-FM_RE = re.compile(r'^---\n(.*?)\n---\n', re.DOTALL)
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--vault', required=True, help='Path to vault root')
+    parser.add_argument('--fixed', action='store_true', help='Use fixed-width text output')
+    args = parser.parse_args()
 
+    vault = args.vault
+    if not os.path.isdir(vault):
+        parser.error(f'vault directory not found: {vault}')
 
-def tabulate(vault):
     counts = Counter()
+
     for root, dirs, files in os.walk(vault):
         dirs[:] = [d for d in dirs if not d.startswith('.')]
         for fn in files:
@@ -36,7 +31,7 @@ def tabulate(vault):
                     head = f.read(4000)
             except Exception:
                 continue
-            m = FM_RE.match(head)
+            m = fm_re.match(head)
             if not m:
                 continue
             try:
@@ -50,34 +45,24 @@ def tabulate(vault):
             if folder == '.':
                 folder = '(root)'
             counts[(t, folder)] += 1
-    return counts
 
-
-def report(counts):
     rows = sorted(counts.items(), key=lambda kv: (kv[0][0], -kv[1]))
-    print(f"{'type':<15} {'folder':<45} {'count':>5}")
-    print("-" * 67)
+    if args.fixed:
+        print(f"{'type':<15} {'folder':<45} {'count':>5}")
+        print("-" * 67)
+        for (t, folder), c in rows:
+            print(f"{t:<15} {folder:<45} {c:>5}")
+        print("-" * 67)
+        print("total typed files:", sum(counts.values()))
+        return
+
+    print("| type | folder | count |")
+    print("|---|---|---:|")
     for (t, folder), c in rows:
-        print(f"{t:<15} {folder:<45} {c:>5}")
-    print("-" * 67)
-    print("total typed files:", sum(counts.values()))
+        print(f"| {t} | {folder} | {c} |")
 
-
-def main():
-    if sys.argv[1:2] == ['--explicit']:
-        if len(sys.argv) != 3:
-            print(__doc__)
-            sys.exit(1)
-        vault = sys.argv[2]
-    else:
-        if len(sys.argv) != 2:
-            print(__doc__)
-            sys.exit(1)
-        cfg = config_loader.load()
-        print(f"config: {cfg['_source']}")
-        vault = config_loader.vault_path(cfg, sys.argv[1])
-
-    report(tabulate(vault))
+    print()
+    print(f"**Total typed files:** {sum(counts.values())}")
 
 
 if __name__ == '__main__':
