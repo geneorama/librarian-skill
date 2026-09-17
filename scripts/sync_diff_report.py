@@ -3,7 +3,7 @@
 Compare two hash CSVs produced by sync_hash_vaults.py and report:
   - ids only in A
   - ids only in B
-  - ids in both but with different body hash (real or noise diffs)
+  - ids in both but with different hash (real or noise diffs)
 
 Usage:
     python3 sync_diff_report.py <csv_a> <csv_b>
@@ -37,11 +37,6 @@ def normalize(body):
     return '\n'.join(lines)
 
 
-def strip_fm(text):
-    m = re.match(r'^---\n.*?\n---\n', text, re.S)
-    return text[m.end():] if m else text
-
-
 def main():
     if len(sys.argv) < 3:
         print(__doc__)
@@ -69,8 +64,8 @@ def main():
         for i in diff:
             pa = os.path.join(root_a, a[i]['filename'])
             pb = os.path.join(root_b, b[i]['filename'])
-            ta = strip_fm(open(pa, encoding='utf-8').read())
-            tb = strip_fm(open(pb, encoding='utf-8').read())
+            ta = open(pa, encoding='utf-8').read()
+            tb = open(pb, encoding='utf-8').read()
             (noise if normalize(ta) == normalize(tb) else real).append(i)
         print(f"  noise-only (whitespace/nbsp): {len(noise)}")
         print(f"  real diffs: {len(real)}")

@@ -29,7 +29,6 @@ lives in `references/`:
 | stamp or edit frontmatter | `references/frontmatter.md` — the settled field format |
 | choose a destination folder or assign a `type` | `references/taxonomy.md` — types, sync behavior, location maps |
 | log an action or file an issue | `references/logging.md` — log line format, issues-note format |
-| wonder why a rule exists | `references/case-archive.md` — real incidents behind the rules |
 
 If a reference contradicts something you believed, the reference wins.
 
@@ -220,9 +219,6 @@ paths) or falls back to `config-sample/vaults.yaml` (placeholder paths, safe
 to publish). Copy the sample to `config/vaults.yaml` and fill in real paths
 before first use; each script also accepts `--explicit <path> ...` args to
 bypass config entirely.
-
-Cross-machine hash comparisons: normalize CRLF→LF first. A same-machine `cp`
-needs no normalization — it is byte-identical by construction.
 
 ## Out of scope for now — flag, don't improvise
 

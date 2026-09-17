@@ -2,7 +2,7 @@
 """
 Scan two Obsidian vaults for "managed" notes (frontmatter has id +
 sync vaults including both vault names) and write a CSV of
-id,filename,sha256(body) for each vault.
+id,filename,sha256(file) for each vault.
 
 Usage (uses config/vaults.yaml, falls back to config-sample):
     python3 sync_hash_vaults.py [vault_a_key] [vault_b_key] [date_prefix]
@@ -17,8 +17,11 @@ Writes:
 Notes:
 - A note counts as "managed" only if it has both an `id:` field and a
   `sync vaults:` field whose value contains BOTH vault names.
-- Hash is computed on the frontmatter-stripped body only, so metadata-only
-  edits (id, home vault, type, etc.) don't trigger false diffs.
+- Hash is computed on the whole file, raw bytes, no normalization. This is
+  the exact same hash you get by running, on the file itself, in any
+  location - a different machine, an old copy, a different branch, anything
+  outside this script:
+    sha256sum <file> ## linux and windows (with git bash for windows)
 """
 import re
 import os
@@ -39,13 +42,14 @@ def scan(root, name_a, name_b):
                 continue
             p = os.path.join(dirpath, f)
             try:
-                text = open(p, encoding='utf-8').read()
+                raw = open(p, 'rb').read()
+                text = raw.decode('utf-8')
             except Exception:
                 continue
             m = re.match(r'^---\n(.*?)\n---\n(.*)$', text, re.S)
             if not m:
                 continue
-            fm, body = m.group(1), m.group(2)
+            fm = m.group(1)
             idm = re.search(r'^id:\s*(\S+)', fm, re.M)
             syncm = re.search(r'^sync vaults:\s*(.+)$', fm, re.M)
             if not idm or not syncm:
@@ -54,7 +58,7 @@ def scan(root, name_a, name_b):
             if name_a not in vaults or name_b not in vaults:
                 continue
             note_id = idm.group(1)
-            h = hashlib.sha256(body.strip().encode('utf-8')).hexdigest()
+            h = hashlib.sha256(raw).hexdigest()
             rows.append((note_id, os.path.relpath(p, root), h))
     return rows
 
