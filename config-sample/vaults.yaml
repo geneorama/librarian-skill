@@ -1,0 +1,15 @@
+# Demo config — copy this file to config/vaults.yaml and fill in real paths.
+# config/vaults.yaml is gitignored; this sample is the only version checked in.
+
+vaults:
+  personal:
+    path: /path/to/your/personal-vault
+  work:
+    path: /path/to/your/work-vault
+
+# Default pair used by scripts when a vault pair isn't given on the command line.
+default_pair:
+  a: personal
+  b: work
+
+output_dir: /path/to/output
