@@ -34,6 +34,8 @@ import config_loader
 
 
 def scan(root, name_a, name_b):
+    if not os.path.isdir(root):
+        sys.exit(f"not a directory: {root}")
     rows = []
     for dirpath, dirs, files in os.walk(root):
         dirs[:] = [d for d in dirs if not d.startswith('.git')]
@@ -42,11 +44,12 @@ def scan(root, name_a, name_b):
                 continue
             p = os.path.join(dirpath, f)
             try:
-                raw = open(p, 'rb').read()
+                with open(p, 'rb') as stream:
+                    raw = stream.read()
                 text = raw.decode('utf-8')
             except Exception:
                 continue
-            m = re.match(r'^---\n(.*?)\n---\n(.*)$', text, re.S)
+            m = re.match(r'^---\r?\n(.*?)\r?\n---(?:\r?\n|$)', text, re.S)
             if not m:
                 continue
             fm = m.group(1)
@@ -54,7 +57,7 @@ def scan(root, name_a, name_b):
             syncm = re.search(r'^sync vaults:\s*(.+)$', fm, re.M)
             if not idm or not syncm:
                 continue
-            vaults = syncm.group(1)
+            vaults = {v.strip() for v in syncm.group(1).strip().strip('"\'').split(',')}
             if name_a not in vaults or name_b not in vaults:
                 continue
             note_id = idm.group(1)
