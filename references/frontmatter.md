@@ -1,65 +1,46 @@
-# Sync frontmatter (settled format)
+# Frontmatter
 
-This format is settled — do not restyle it. Keys are lowercase **with spaces**
-(`home vault`, not `home_vault`); the vault list is a **comma-separated string**,
-not a YAML array. The owner stamps new notes in Obsidian with a Templater
-shortcut that writes exactly these fields; librarian stamps must be
-indistinguishable from the owner's.
+The local sync template defines the field format.
+Read it before adding fields. Preserve existing values and unrelated metadata.
+Apply only the needed edits to the file, then compare the final whole-file hashes after copying.
 
-```yaml
----
-id: 80203c276b13
-created: 2026-08-04 23:43:43
-home vault: personal
-sync vaults: personal, work
-type: note
----
-```
+The `_sync_fields_javascript` pattern adds a field only when that property is absent.
+It preserves existing IDs and dates, uses the active vault as the origin, and leaves a missing type blank for later judgment.
+Its configured destination names are installation data, not public defaults.
+Read the template as a standard without assuming that reserializing YAML preserves the original bytes.
 
-## Field rules
-
-| Field | Rule |
+| Field | Meaning and format |
 |---|---|
-| `id` | 12 hex chars = 6 random bytes (`openssl rand -hex 6`). Collision-**checked** (search all reachable vaults before stamping), not collision-resistant. Never content-derived — it must survive edits. Never timestamp-derived — same-minute notes collide systematically. |
-| `created` | `YYYY-MM-DD HH:mm:ss`, from the file's creation date or the note's own Timeline section. Add only when actually known; never guess. Date-only values appear in older notes and are acceptable. |
-| `home vault` | The authoritative origin vault — typically the personal master for personal-origin notes. |
-| `sync vaults` | Every vault the note belongs in, **including the home vault**. `<none>` = managed but deliberately unsynced. |
-| `type` | Optional; values only from `taxonomy.md`. Not every note needs one, and having one does not itself mean synced. |
-| `differences allowed` | Optional. `true` = copies are expected to diverge; a hash mismatch is an alive-check, not a problem. Absent = copies must match. |
-| `private` | Optional. `true` = never propagate to any other vault. A soft signal — its absence proves nothing (see the Judgment section of SKILL.md). |
+| `id` | Stable note identity, normally 12 lowercase hexadecimal characters |
+| `created` | Known creation date, normally `YYYY-MM-DD HH:mm:ss` |
+| `home vault` | The note's origin, not an automatic choice of authoritative content |
+| `sync vaults` | Intended vault membership, as a comma-separated string |
+| `type` | An existing type appropriate to the note and its placement |
 
-## Stamping example
+Use these keys with spaces. Do not change the list into a YAML array.
+An existing date-only value can remain date-only. Do not invent an unknown creation date.
+An existing blank field needs interpretation, not automatic replacement.
+Use the local convention for deliberately unsynced notes.
+Having an ID or type alone does not request synchronization.
 
-Before (note with existing frontmatter — add only what's missing, preserve
-everything present):
-
-```yaml
----
-aliases: [CBOM kickoff]
-author: Gene
----
+```bash
+# Read-only: generate a candidate ID for a note that needs a new identity.
+openssl rand -hex 6
 ```
 
-After:
+Before assigning it, check for a matching note and ID collisions in reachable vaults.
+Reuse the counterpart's ID when one already exists.
+Do not replace an existing ID merely because its format differs from the template.
+Report conflicting identities before changing them.
+
+The following is a fictional example. Use the actual template and known metadata for a real note.
 
 ```yaml
 ---
-aliases: [CBOM kickoff]
-author: Gene
-id: 3f91c2e07ab4
-created: 2026-08-07 09:15:00
+id: a1b2c3d4e5f6
+created: 2026-01-15 09:30:00
 home vault: personal
 sync vaults: personal, work
+type: article
 ---
 ```
-
-A note with **no** frontmatter gets a new block at the very top containing only
-the sync fields; the body starts exactly where it started before — byte-for-byte.
-
-## Legacy patterns — flag for normalization, never imitate
-
-- `home_vault:` / `sync_vaults:` (snake_case, from early designs)
-- `sync_vaults: [coc-work]` (YAML arrays)
-- ULIDs or 8-hex ids
-
-When found, list them in the review report; normalize only on instruction.

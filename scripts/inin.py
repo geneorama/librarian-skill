@@ -12,7 +12,7 @@ Usage (explicit, ignores config):
     inin.py --explicit SOURCE_VAULT_PATH TARGET_VAULT_PATH TARGET_LABEL
 
 TARGET_LABEL is the name as it appears in the `sync vaults` property
-(case-insensitive substring match). In config mode this is just TARGET_KEY.
+(case-insensitive exact list entry). In config mode this is just TARGET_KEY.
 
 Read only. Never writes to a vault.
 
@@ -79,7 +79,8 @@ def run(source_root, target_root, label):
     labeled = 0
     rows = []
     for path, fm in source.items():
-        if label.lower() not in fm.get("sync vaults", "").lower():
+        vaults = {v.strip().lower() for v in fm.get("sync vaults", "").split(",")}
+        if label.lower() not in vaults:
             continue
         labeled += 1
         note_id = fm.get("id")

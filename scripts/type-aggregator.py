@@ -3,8 +3,8 @@ import os, re, yaml
 from collections import Counter
 
 ## Example use
-## python3 type-aggregator.py --vault coc-work
-## python3 type-aggregator.py --vault coc-work --fixed
+## python3 type-aggregator.py --vault /path/to/vault
+## python3 type-aggregator.py --vault /path/to/vault --fixed
 
 fm_re = re.compile(r'^---\n(.*?)\n---\n', re.DOTALL)
 

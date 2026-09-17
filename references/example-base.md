@@ -1,4 +1,6 @@
-Example base for monitoring notes that need to be synced. 
+This Base lists notes with a type, home vault, or sync membership.
+It includes candidates that are not yet registered for sync.
+Confirm `id` and intended `sync vaults` before using an entry for a transfer.
 
 ```
 filters:
@@ -25,5 +27,4 @@ views:
       file.name: 247
       note.created: 104
 ```
-
 
