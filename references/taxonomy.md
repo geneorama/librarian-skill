@@ -48,54 +48,14 @@ from memory.
 
 ## Building your own type→folder table
 
-Don't hand-maintain the taxonomy from memory — generate it. This script counts
-notes per (`type`, folder) pair, showing where each type actually lives, so
-real stragglers (a narrow type spread across more folders than it should be)
-are visible at a glance. Not a live query — re-run and re-paste when the
-taxonomy needs a refresh.
+Don't hand-maintain the taxonomy from memory — generate it. `scripts/type-aggregator.py`
+counts notes per (`type`, folder) pair, showing where each type actually
+lives, so real stragglers (a narrow type spread across more folders than it
+should be) are visible at a glance. Not a live query — re-run and re-paste
+when the taxonomy needs a refresh.
 
-```python
-import os, re, yaml
-from collections import Counter
-
-VAULT = "/path/to/your/vault"  # point at any vault root
-counts = Counter()
-
-fm_re = re.compile(r'^---\n(.*?)\n---\n', re.DOTALL)
-
-for root, dirs, files in os.walk(VAULT):
-    dirs[:] = [d for d in dirs if not d.startswith('.')]
-    for fn in files:
-        if not fn.endswith('.md'):
-            continue
-        path = os.path.join(root, fn)
-        try:
-            with open(path, 'r', encoding='utf-8', errors='ignore') as f:
-                head = f.read(4000)
-        except Exception:
-            continue
-        m = fm_re.match(head)
-        if not m:
-            continue
-        try:
-            fm = yaml.safe_load(m.group(1)) or {}
-        except Exception:
-            continue
-        t = fm.get('type')
-        if not t:
-            continue
-        folder = os.path.relpath(root, VAULT)
-        if folder == '.':
-            folder = '(root)'
-        counts[(t, folder)] += 1
-
-rows = sorted(counts.items(), key=lambda kv: (kv[0][0], -kv[1]))
-print(f"{'type':<15} {'folder':<45} {'count':>5}")
-print("-" * 67)
-for (t, folder), c in rows:
-    print(f"{t:<15} {folder:<45} {c:>5}")
-print("-" * 67)
-print("total typed files:", sum(counts.values()))
+```
+python3 scripts/type-aggregator.py <vault_key>
 ```
 
 Paste the output into a note kept with the vault registry — that table, not
