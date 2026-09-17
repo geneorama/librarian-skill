@@ -55,7 +55,8 @@ should be) are visible at a glance. Not a live query — re-run and re-paste
 when the taxonomy needs a refresh.
 
 ```
-python3 scripts/type-aggregator.py <vault_key>
+python3 scripts/type-aggregator.py --vault <vault_path>
+python3 scripts/type-aggregator.py --vault <vault_path> --fixed  # fixed-width text instead of a markdown table
 ```
 
 Paste the output into a note kept with the vault registry — that table, not
