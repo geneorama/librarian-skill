@@ -4,7 +4,6 @@ An agent skill for keeping Obsidian notes in sync by ID, with whole-file SHA-256
 The agent finds counterparts, explains differences, and carries out requested copies, updates, and approved merges.
 
 Start with [SKILL.md](SKILL.md).
-The [September comparison notes](2026-09-09-sync-notes.md) preserve the original hash, diff, and reading requirements.
 
 ## Keep the workflow editable
 
@@ -56,6 +55,21 @@ See [scheduled task documentation](https://learn.chatgpt.com/docs/automations?su
 For development on one machine, the visible checkout plus a startup pointer avoids an installation refresh step.
 On another machine, update the checkout and let the startup pointer read its current files.
 No scheduler is required for ordinary sync requests.
+
+## Graph queries
+
+The skill uses MCP for backlinks and other graph evidence, with filesystem operations for edits and byte-preserving copies.
+MCP supplies an interface. Graph awareness depends on the queries and how the agent interprets their results.
+For example, CyanHeads documents search-based backlink queries rather than a dedicated backlink tool.
+It also offers structured metadata search and optional outgoing links, useful for note discovery and comparison.
+See [the server documentation](https://github.com/cyanheads/obsidian-mcp-server#tools).
+
+Obsidian distinguishes linked mentions from unlinked mentions of a name.
+Confirm the actual link target before treating a search result as a backlink.
+See [Obsidian's backlink documentation](https://help.obsidian.md/plugins/backlinks).
+
+If the required MCP query fails or cannot supply the needed evidence, pause the dependent operation and report the gap.
+An already-resolved file comparison does not need a graph query.
 
 ## Existing optional helpers
 
