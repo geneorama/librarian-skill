@@ -22,6 +22,8 @@ An existing date-only value can remain date-only. Do not invent an unknown creat
 An existing blank field needs interpretation, not automatic replacement.
 Use the local convention for deliberately unsynced notes.
 Having an ID or type alone does not request synchronization.
+Every synced Markdown note needs a unique logical ID, shared with its corresponding copies.
+The `sync vaults` field declares membership. Linked binaries are included without these note fields.
 
 ```bash
 # Read-only: generate a candidate ID for a note that needs a new identity.

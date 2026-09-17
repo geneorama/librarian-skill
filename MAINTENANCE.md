@@ -23,7 +23,7 @@ Local review notes matching `review-*.md` and files under `config/` remain exclu
 ```bash
 # Changes the index: stage the reviewed skill, notes, examples, and helper edits.
 git add -A -- .gitignore SKILL.md README.md MAINTENANCE.md \
-  2026-09-09-sync-notes.md references config-sample scripts
+  references config-sample scripts
 
 # Read-only: inspect exactly what will enter the commit.
 git diff --cached --check
